@@ -12,14 +12,13 @@ var GitNoDeploy = function() {
 };
 
 // Function to execute pull action to your repositories
-function deploy(postData) {
-  console.log("Arrivato: "+postData);
+GitNoDeploy.prototype.deploy = function(postData) {
+  console.log("Arrivato: "+postData.ciao);
 }
 
 // Check Server Request
 function checkRequest(req, res) {
-  res.writeHeader(200, {"Content-Type": "text/plain"});
-  res.end();
+  var self = this;
   switch(req.url) {
     case '/':
       if(req.method === 'POST') {
@@ -28,10 +27,12 @@ function checkRequest(req, res) {
           query += data;
         });
         req.on('end', function() {
-          var postQuery = querystring.parse(query);
+          res.writeHeader(200, {"Content-Type": "text/plain"});
+          res.end();
+          var postQuery = JSON.parse(querystring.parse(query).payload);
           if(postQuery) {
             // Request sent to me
-            deploy(postQuery);
+            self.deploy(postQuery);
           }
         });
       }
@@ -41,7 +42,7 @@ function checkRequest(req, res) {
 
 // Init
 GitNoDeploy.prototype.init = function() {
-  http.createServer(checkRequest).listen(this.port);
+  http.createServer(checkRequest.bind(this)).listen(this.port);
   console.log("Server Listened on port: "+this.port);
 };
 
