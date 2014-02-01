@@ -20,7 +20,7 @@ GitNoDeploy.prototype.afterExec = function (index) {
 
   config.repos[index].after.forEach(function (value, pos) {
     exec(value, function (error, stdout, stderr) {
-      if (error === null && !self.quiet) {
+      if (!error && !self.quiet) {
         console.log("[" + value + "] - (" + stdout + ")");
       }
       else {
@@ -37,7 +37,7 @@ GitNoDeploy.prototype.pull = function (index) {
   var self  = this;
 
   exec('cd ' + config.repos[index].path + ' && git pull', function (error, stdout, stderr) {
-    if (error === null) {
+    if (!error) {
       if (!self.quiet) {
         console.log(config.repos[index].url + " updated!");
       }
