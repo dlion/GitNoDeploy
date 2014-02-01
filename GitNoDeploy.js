@@ -58,21 +58,27 @@ GitNoDeploy.prototype.pull = function (index) {
 
 // Function to check Repos
 GitNoDeploy.prototype.checkRepos = function (index) {
-
-  if (fs.existsSync(config.repos[index].path)) {
-    if (fs.existsSync(config.repos[index].path + "/.git")) {
-      this.pull(index);
+  if (config.repos[index].url.indexOf('git@') === -1) {
+    if (fs.existsSync(config.repos[index].path)) {
+      if (fs.existsSync(config.repos[index].path + "/.git")) {
+        this.pull(index);
+      }
+      else {
+        if (!this.quiet) {
+          console.log(config.repos[index].path + " Is not a repository");
+        }
+      }
     }
     else {
       if (!this.quiet) {
-        console.log(config.repos[index].path + " Is not a repository");
+        console.log(config.repos[index].path + " Not found on your filesystem!");
       }
     }
   }
   else {
-    if (!this.quiet) {
-      console.log(config.repos[index].path + " Not found on your filesystem!");
-    }
+   if (!this.quiet) {
+     console.log("Repository URL " + config.repos[index].url + " should use the https:// Github URL.");
+   }
   }
 };
 
