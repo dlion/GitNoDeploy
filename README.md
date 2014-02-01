@@ -5,7 +5,8 @@ it allows you to deploy your repos into your server everytime you push a change.
 
 ## Configure
 
-* First of all install Node.js into your server and edit GitNoDeploy-config.json file.
+* First of all install Node.js into your server
+* Rename GitNoDeploy-config.json.example to GitNoDeploy-config.json and edit it.
 * port: [Default: 2001]
 * quiet: Set to false to mute the script
 * repos: Array of your repos:

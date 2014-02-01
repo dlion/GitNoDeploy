@@ -9,6 +9,6 @@
   {
     "url": "https://github.com/dlion/bottone",
     "path": "/home/dlion/test/bottone",
-    "after": [ "echo Bottone updated!" ]
+    "after": [ "echo Bottone updated!", "ls /home/dlion" ]
   }]
 }
