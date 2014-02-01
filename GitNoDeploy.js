@@ -108,8 +108,6 @@ function checkRequest(req, res) {
           query += data;
         });
         req.on('end', function() {
-          res.writeHeader(200, {'Content-Type': 'text/plain'});
-          res.end();
           var postQuery = JSON.parse(querystring.parse(query,'&','=',{'maxKeys': 1}).payload);
           if (postQuery) {
             self.deploy(postQuery);
@@ -119,6 +117,8 @@ function checkRequest(req, res) {
               console.log("Query didn't accepted!");
             }
           }
+          res.writeHeader(200, {'Content-Type': 'text/plain'});
+          res.end();
         });
       }
     break;
