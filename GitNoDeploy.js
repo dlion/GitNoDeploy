@@ -31,6 +31,7 @@ GitNoDeploy.prototype.afterExec = function (index) {
   });
 };
 
+//Execute pull on the repository
 GitNoDeploy.prototype.pull = function (index) {
   var self = this;
   exec('cd ' + config.repos[index].path + ' && git pull', function (error, stdout, stderr) {
@@ -82,7 +83,7 @@ GitNoDeploy.prototype.checkRepos = function (index) {
   }
 };
 
-// Check repository
+// Check repository on your filesystem
 GitNoDeploy.prototype.deploy = function (postData) {
   var self = this;
   var find = false;
