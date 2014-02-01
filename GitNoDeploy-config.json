@@ -1,13 +1,12 @@
 {
   "port": 2001,
+  "quiet": false,
   "repos": [{
-    "name": "myBlueBank",
     "url": "https://github.com/dlion/myBlueBank",
     "path": "/home/dlion/test/myBlueBank",
     "after": [ "echo Deploying", "echo Everything ok" ]
   },
   {
-    "name": "bottone",
     "url": "https://github.com/dlion/bottone",
     "path": "/home/dlion/test/bottone",
     "after": [ "echo Bottone updated!" ]
