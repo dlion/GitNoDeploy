@@ -1,11 +1,11 @@
 #! /usr/bin/env node
 
-var http        =   require('http');
-var url         =   require('url');
-var querystring =   require('querystring');
-var fs          =   require('fs');
-var exec        =   require('child_process').exec;
-var config      =   require('./GitNoDeploy-config.json');
+var http        =   require('http'),
+    url         =   require('url'),
+    querystring =   require('querystring'),
+    fs          =   require('fs'),
+    exec        =   require('child_process').exec,
+    config      =   require('./GitNoDeploy-config.json');
 
 // Constructor
 var GitNoDeploy = function () {
@@ -85,8 +85,7 @@ GitNoDeploy.prototype.checkRepos = function (index) {
 
 // Check repository on your filesystem
 GitNoDeploy.prototype.deploy = function (postData) {
-  var self = this;
-  var find = false;
+  var self = this, find = false;
 
   config.repos.forEach(function (value, index) {
     if (postData.repository.url === value.url) {
@@ -96,7 +95,7 @@ GitNoDeploy.prototype.deploy = function (postData) {
   });
 
   if (!this.quiet) {
-    if (find === false ) {
+    if (!find) {
       console.log("Repository not found!");
     }
     else {
@@ -108,6 +107,7 @@ GitNoDeploy.prototype.deploy = function (postData) {
 // Check Server Request
 function checkRequest(req, res) {
   var self = this, query = '';
+
   switch (req.url) {
     case '/':
       if (req.method === 'POST') {
