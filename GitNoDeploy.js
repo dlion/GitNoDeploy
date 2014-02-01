@@ -16,7 +16,8 @@ var GitNoDeploy = function () {
 
 //Executes command after pull request
 GitNoDeploy.prototype.afterExec = function (index) {
-  var self = this;
+  var self  = this;
+
   config.repos[index].after.forEach(function (value, pos) {
     exec(value, function (error, stdout, stderr) {
       if (error === null && !self.quiet) {
@@ -33,7 +34,8 @@ GitNoDeploy.prototype.afterExec = function (index) {
 
 //Execute pull on the repository
 GitNoDeploy.prototype.pull = function (index) {
-  var self = this;
+  var self  = this;
+
   exec('cd ' + config.repos[index].path + ' && git pull', function (error, stdout, stderr) {
     if (error === null) {
       if (!self.quiet) {
@@ -85,11 +87,11 @@ GitNoDeploy.prototype.checkRepos = function (index) {
 
 // Check repository on your filesystem
 GitNoDeploy.prototype.deploy = function (postData) {
-  var self = this, find = false;
+  var self  = this, find  = false;
 
   config.repos.forEach(function (value, index) {
     if (postData.repository.url === value.url) {
-      find = true;
+      find  = true;
       self.checkRepos(index);
     }
   });
@@ -104,12 +106,12 @@ GitNoDeploy.prototype.deploy = function (postData) {
   }
 };
 
-// Check Server Request
-function checkRequest(req, res) {
-  var self = this, query = '';
+// Start HTTP Server
+GitNoDeploy.prototype.init = function () {
+  var self  = this, query = '';
 
-  switch (req.url) {
-    case '/':
+  http.createServer(function(req, res) {
+    if (req.url === '/' && req.method === 'POST') {
       if (req.method === 'POST') {
         req.on('data', function(data) {
           query += data;
@@ -128,13 +130,9 @@ function checkRequest(req, res) {
           res.end();
         });
       }
-    break;
-  }
-}
+    }
+  }).listen(this.port);
 
-// Start HTTP Server
-GitNoDeploy.prototype.init = function () {
-  http.createServer(checkRequest.bind(this)).listen(this.port);
   if (!this.quiet) {
     console.log("Server Listened on port: "+this.port);
   }
