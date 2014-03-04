@@ -1,142 +1,135 @@
 #! /usr/bin/env node
 
 var http        =   require('http'),
-    url         =   require('url'),
     querystring =   require('querystring'),
     fs          =   require('fs'),
     exec        =   require('child_process').exec,
     config      =   require('./GitNoDeploy-config.json');
 
-// Constructor
-var GitNoDeploy = function () {
-  this.port   = config.port   ||  2001;
-  this.quiet  = config.quiet  ||  false;
-  this.init();
-};
+var GitNoDeploy = (function (http, querystring, fs, exec, config) {
+  var port = config.port || 2001,
+      quiet = config.quiet || false;
 
 //Executes command after pull request
-GitNoDeploy.prototype.afterExec = function (index) {
-  var self  = this;
+  var afterExec = function (index) {
+    config.repos[index].after.forEach(function (value) {
+      exec(value, function (error, stdout, stderr) {
+        if (!error && !quiet) {
+          console.log("[" + value + "] - (" + stdout + ")");
+        }
+        else {
+          if(!quiet) {
+            console.log("[" + value + "] - (\n" + stdout + ") - {\n" + stderr + "}");
+          }
+        }
+      });
+    });
+  };
 
-  config.repos[index].after.forEach(function (value, pos) {
-    exec(value, function (error, stdout, stderr) {
-      if (!error && !self.quiet) {
-        console.log("[" + value + "] - (" + stdout + ")");
+  //Execute pull on the repository
+  var pull = function (index) {
+    exec('cd ' + config.repos[index].path + ' && git pull', function (error, stdout, stderr) {
+      if (!error) {
+        if (!quiet) {
+          console.log(config.repos[index].url + " updated!");
+        }
+        //If present execute after commands
+        if (Array.isArray(config.repos[index].after)) {
+          afterExec(index);
+        }
+        else {
+          if (!quiet) {
+            console.log("After is not an array!");
+          }
+        }
       }
       else {
-        if(!self.quiet) {
-          console.log("[" + value + "] - (\n" + stdout + ") - {\n" + stderr + "}");
+        if (!quiet) {
+          console.log("Error on pull request: " + error + "\n" + stdout + "\n" + stderr);
         }
       }
     });
-  });
-};
+  };
 
-//Execute pull on the repository
-GitNoDeploy.prototype.pull = function (index) {
-  var self  = this;
-
-  exec('cd ' + config.repos[index].path + ' && git pull', function (error, stdout, stderr) {
-    if (!error) {
-      if (!self.quiet) {
-        console.log(config.repos[index].url + " updated!");
-      }
-      //If present execute after commands
-      if (Array.isArray(config.repos[index].after)) {
-        self.afterExec(index);
+  // Function to check Repos
+  var checkRepos = function (index) {
+    if (config.repos[index].url.indexOf('git@') === -1) {
+      if (fs.existsSync(config.repos[index].path)) {
+        if (fs.existsSync(config.repos[index].path + "/.git")) {
+          pull(index);
+        }
+        else {
+          if (!quiet) {
+            console.log(config.repos[index].path + " Is not a repository");
+          }
+        }
       }
       else {
-        if (!self.quiet) {
-          console.log("After is not an array!");
+        if (!quiet) {
+          console.log(config.repos[index].path + " Not found on your filesystem!");
         }
       }
     }
     else {
-      if (!self.quiet) {
-        console.log("Error on pull request: " + error + "\n" + stdout + "\n" + stderr);
+      if (!quiet) {
+        console.log("Repository URL " + config.repos[index].url + " should use the https:// Github URL.");
       }
     }
-  });
-};
+  };
 
-// Function to check Repos
-GitNoDeploy.prototype.checkRepos = function (index) {
-  if (config.repos[index].url.indexOf('git@') === -1) {
-    if (fs.existsSync(config.repos[index].path)) {
-      if (fs.existsSync(config.repos[index].path + "/.git")) {
-        this.pull(index);
+  // Check repository on your filesystem
+  var deploy = function (postData) {
+    var find  = false;
+
+    config.repos.forEach(function (value, index) {
+      if (postData.repository.url === value.url) {
+        find  = true;
+        checkRepos(index);
+      }
+    });
+
+    if (!quiet) {
+      if (!find) {
+        console.log("Repository not found!");
       }
       else {
-        if (!this.quiet) {
-          console.log(config.repos[index].path + " Is not a repository");
+        console.log("Repository found!");
+      }
+    }
+  };
+
+  return {
+    // Start HTTP Server
+    init: function () {
+      var query = '';
+      http.createServer(function(req, res) {
+        if (req.url === '/' && req.method === 'POST') {
+          if (req.method === 'POST') {
+            req.on('data', function(data) {
+              query += data;
+            });
+            req.on('end', function() {
+              var postQuery = JSON.parse(querystring.parse(query,'&','=',{'maxKeys': 1}).payload);
+              if (postQuery) {
+                deploy(postQuery);
+              }
+              else {
+                if (!quiet) {
+                  console.log("Query didn't accepted!");
+                }
+              }
+              res.writeHeader(200, {'Content-Type': 'text/plain'});
+              res.end();
+            });
+          }
         }
+      }).listen(port);
+      if (!quiet) {
+        console.log("Server Listened on port: "+port);
       }
     }
-    else {
-      if (!this.quiet) {
-        console.log(config.repos[index].path + " Not found on your filesystem!");
-      }
-    }
-  }
-  else {
-   if (!this.quiet) {
-     console.log("Repository URL " + config.repos[index].url + " should use the https:// Github URL.");
-   }
-  }
-};
-
-// Check repository on your filesystem
-GitNoDeploy.prototype.deploy = function (postData) {
-  var self  = this, find  = false;
-
-  config.repos.forEach(function (value, index) {
-    if (postData.repository.url === value.url) {
-      find  = true;
-      self.checkRepos(index);
-    }
-  });
-
-  if (!this.quiet) {
-    if (!find) {
-      console.log("Repository not found!");
-    }
-    else {
-      console.log("Repository found!");
-    }
-  }
-};
-
-// Start HTTP Server
-GitNoDeploy.prototype.init = function () {
-  var self  = this, query = '';
-
-  http.createServer(function(req, res) {
-    if (req.url === '/' && req.method === 'POST') {
-      if (req.method === 'POST') {
-        req.on('data', function(data) {
-          query += data;
-        });
-        req.on('end', function() {
-          var postQuery = JSON.parse(querystring.parse(query,'&','=',{'maxKeys': 1}).payload);
-          if (postQuery) {
-            self.deploy(postQuery);
-          }
-          else {
-            if (!self.quiet) {
-              console.log("Query didn't accepted!");
-            }
-          }
-          res.writeHeader(200, {'Content-Type': 'text/plain'});
-          res.end();
-        });
-      }
-    }
-  }).listen(this.port);
-
-  if (!this.quiet) {
-    console.log("Server Listened on port: "+this.port);
-  }
-};
+  };
+}(http, querystring, fs, exec, config));
 
 //Go
-var Go = new GitNoDeploy();
+GitNoDeploy.init();
