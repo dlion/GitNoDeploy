@@ -110,6 +110,7 @@ var GitNoDeploy = (function (http, fs, exec, config) {
             req.on('end', function() {
               var postQuery = JSON.parse(query);
               if (postQuery) {
+                query = '';
                 deploy(postQuery);
               }
               else {
