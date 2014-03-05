@@ -1,12 +1,11 @@
 #! /usr/bin/env node
 
 var http        =   require('http'),
-    querystring =   require('querystring'),
     fs          =   require('fs'),
     exec        =   require('child_process').exec,
     config      =   require('./GitNoDeploy-config.json');
 
-var GitNoDeploy = (function (http, querystring, fs, exec, config) {
+var GitNoDeploy = (function (http, fs, exec, config) {
   var port = config.port || 2001,
       quiet = config.quiet || false;
 
@@ -109,7 +108,7 @@ var GitNoDeploy = (function (http, querystring, fs, exec, config) {
               query += data;
             });
             req.on('end', function() {
-              var postQuery = JSON.parse(querystring.parse(query,'&','=',{'maxKeys': 1}).payload);
+              var postQuery = JSON.parse(query);
               if (postQuery) {
                 deploy(postQuery);
               }
@@ -129,7 +128,7 @@ var GitNoDeploy = (function (http, querystring, fs, exec, config) {
       }
     }
   };
-}(http, querystring, fs, exec, config));
+}(http, fs, exec, config));
 
 //Go
 GitNoDeploy.init();
