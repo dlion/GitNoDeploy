@@ -1,0 +1,25 @@
+{
+  "name": "gitnodeploy",
+  "version": "1.0.0",
+  "description": "Allows you to deploy your repos into your server everytime you push a change.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dlion/GitNoDeploy.git"
+  },
+  "keywords": [
+    "GitNoDeploy",
+    "deploy",
+    "git",
+    "github"
+  ],
+  "author": "Domenico Luciani <domenicoleoneluciani@gmail.com> (http://dlion.it)",
+  "license": "wtfpl",
+  "bugs": {
+    "url": "https://github.com/dlion/GitNoDeploy/issues"
+  },
+  "homepage": "https://github.com/dlion/GitNoDeploy"
+}
